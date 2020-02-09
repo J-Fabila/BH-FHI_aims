@@ -1,14 +1,19 @@
 #include<atomicpp.h>
 
-int continue_alg, randomness, kick, iteraciones,swap_step, contenido;
-float step_width, temperature ;
+string Simbolo_1, Simbolo_2;
+int N_Simbolo_1, N_Simbolo_2, n;
+string initialization_file;
+int continue_alg,  Ncore, randomness, kick, iteraciones,swap_step, contenido, m;
+float step_width, Temperature ;
 string file_name, command;
 
-int main(int argc, char *argv[]){
+int main(int argc, char *argv[])
+{
+	
+//_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+//                                    Gets data from input.bh                                     //
+//_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
-//################################################################################################
-//#                                    Gets data from input.bh                                   #
-//################################################################################################
 
 Simbolo_1=string_pipe("grep 'cluster_ntyp' input.bh | cut -d '[' -f 2 | cut -d ':' -f 1 ");
 Simbolo_2=string_pipe("grep 'cluster_ntyp' input.bh | cut -d '[' -f 3 | cut -d ':' -f 1 ");
@@ -26,7 +31,7 @@ iteraciones=system("grep 'iterations' input.bh | awk '{ print $3 }' ");
 //m=int_pipe("......");
 swap_step=system("grep 'swap_step' input.bh | awk '{ print $3 }' ");
 
-
+cout<<Simbolo_1<<" "<<Simbolo_2<<" "<<N_Simbolo_1<<" "<<N_Simbolo_2<<" "<<n<<" "<<continue_alg<<" "<<initialization_file<<" "<<randomness<<" "<<kick<<" "<<file_name<<" "<<step_width<<" "<<Temperature<<"  "<<iteraciones<<" "<<swap_step<<endl;
 //################################# CREATES Work Directory #####################################
 command="if [ -d $file_name ] ; then mv $file_name other_$file_name ; fi ; cp -r input $file_name";
 system(comand);
