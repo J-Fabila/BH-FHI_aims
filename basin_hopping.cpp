@@ -3,99 +3,98 @@
 int continue_alg, randomness, kick, iteraciones,swap_step, contenido;
 float step_width, temperature ;
 string file_name, command;
+
 int main(int argc, char *argv[]){
 
 //################################################################################################
 //#                                    Gets data from input.bh                                   #
 //################################################################################################
 
-continue_alg = stoi(argv[1]);
-randomness   = stoi(argv[2]);
-kick         = stoi(argv[3]);
-iteraciones  = stoi(argv[4]);
-step_width   = stof(argv[5]);
-temperature  = stof(argv[6]);
-file_name    = argv[7]);
-swap_step    = stoi(argv[8]);
-sel          = stoi(argv[9]);
-Nat          = stoi(argv[10]);
-n            = stoi(argv[11]);
-Ncore        = stoi(argv[12]);
-Simbolo_1    = argv[12];
-N_Simbolo_1  = stoi(argv[13]);
-path         = argv[14];
+Simbolo_1=string_pipe("grep 'cluster_ntyp' input.bh | cut -d '[' -f 2 | cut -d ':' -f 1 ");
+Simbolo_2=string_pipe("grep 'cluster_ntyp' input.bh | cut -d '[' -f 3 | cut -d ':' -f 1 ");
+N_Simbolo_1=int_pipe("grep 'cluster_ntyp' input.bh | cut -d '[' -f 2 | cut -d ':' -f 2 | cut -d ']' -f 1 ");
+N_Simbolo_2=int_pipe("grep 'cluster_ntyp' input.bh | cut -d '[' -f 3 | cut -d ':' -f 2 | cut -d ']' -f 1 ");
+continue_alg=int_pipe("grep 'continue' input.bh | cut -d ' ' -f 3 >> variables");
+initialization_file=string_pipe("grep 'initialization_file' input.bh | awk '{print $3}' ");
+randomness=int_pipe("grep 'randomness' input.bh | awk '{print $3}' ");
+kick=int_pipe("grep 'kick_type' input.bh | awk '{print $3}' ");
+file_name=string_pipe("grep 'file_name' input.bh | awk '{print $3}' ");
+step_width=float_pipe("grep 'step_width' input.bh | awk '{print $3}' "); //o double?
+Temperature=float_pipe("grep 'temperature_K' input.bh | awk '{ print $3 }' "); //o double?
+Ncore=int_pipe("grep 'Ncore' input.bh | head -1 | awk '{print $3}' ");
+iteraciones=system("grep 'iterations' input.bh | awk '{ print $3 }' ");
+//m=int_pipe("......");
+swap_step=system("grep 'swap_step' input.bh | awk '{ print $3 }' ");
 
-if(argc == 17 )
-{
-   Simbolo_2=argv[14];
-   N_Simbolo_2=stoi(argv[15]);
-}
 
 //################################# CREATES Work Directory #####################################
 command="if [ -d $file_name ] ; then mv $file_name other_$file_name ; fi ; cp -r input $file_name";
-
+system(comand);
 
 //##############################################################################################
 //#                                         BEGIN ALGORITHM                                    #
 //##############################################################################################
 
-
-system("mkdir rejected");
+system("cd $file_name ; mkdir rejected");
 contenido=0;
 count=1;
 while(contenido!=1)
 {
 
-  if(initialization_file==1 && count==1)
+  if(initialization_file!=false && count==1)
   {
     //Inicializa archivo geometry.in
+    system("cp initalization_file geometry.in")
     count++;
   }
   else
   {
     //Empieza desde 0
-    if(n>3)  //Esto quiere decir que es bimetalico
+    if(type == "bimetalic")  //Esto quiere decir que es bimetalico
     {
       if(randomness==1)  // fully random
       {
-        // clus.SRandomGenerator(...)
+        clus.srand_generator
       }
       else //pseudoaleatorio
       {
-        // clus.RandomGenerator(...)
+        clus.rand_generator
       }
     }
     else //es monometalico
     {
-        if(randomness==1)  // fully random
-        {
-          // clus.SRandomGenerator(...)
-        }
-        else //pseudoaleatorio
-        {
-          // clus.RandomGenerator(...)
-        }
+    	if(randomness==1)  // fully random
+      {
+        clus.srand_generator
+      }
+      else //pseudoaleatorio
+      {
+        clus.rand_generator
+      }
     }
   }
-  if(sel==1)
-  {
-    //algoritmo que haga lo propio cuando hay selective dynamics
-  }
+    
   system("./run.sh");
-  system("grep 'reached required ' OUTCAR | wc -l > contenido.txt");
-  ifstream cont...
-  //read contenido.txt
+  system("grep 'Have a nice day.' output.out | wc -l > contenido.txt"); //Checar output nombre, poner if=1 then
+  ifstream cont("contenido.txt");
+  cont>>contenido;
+  cont.close();
+  system("rm contenido.txt");
+
 }
 
-/////////  MODIFICAR ESTO PARA FHI AIMS (AHORITA ESTA PARA vasp)
-Energia=$(tail -1 OSZICAR | awk '{print $5 }')                 #Extrae  la energia del OSZICAR
-echo "1     $Energia " >> CONTCAR1      #Escribe la energia y num de iteracion en CONTCAR1
-N=$(wc -l CONTCAR | awk '{ print $1 }' )         #Cuenta el numero de lineas que tiene CONTCAR
-tail -$(($N-1)) CONTCAR >> CONTCAR1       #Mueve la informacion a CONTCAR1 con el nuevo titulo
-mv POSCAR POSCAR1                                                      #Mueve POSCAR a POSCAR1
-rm CHG CHGCAR DOSCAR EIGENVAL XDATCAR IBZKPT OSZICAR PCDAT REPORT WAVECAR *.xml CONTCAR
-echo "Step  Energy" >> energies.txt;
-echo "1     $Energia" >> energies.txt
+system("grep \" | Total energy of the DFT / Hartree-Fock s.c.f. calculation \" output.out | cut -d \":\" -f 2 > energy.txt")
+ifstream en("energy.txt");
+en>>energy;
+en.close();
+system("rm energy.txt");
+
+clus.read_fhi("geometry.in.next_step");
+clus.print_xyz("coordinates1.xyz");
+system("mv output.out output1.out");
+system("mv geometry.in geometry1.in");
+system("echo Step Energy >> energies.txt");
+system("echo 1     "+to_string(energy)+" >> energies.txt".c_str() );
 
 cout<<" --> Relaxation of initial configuration: DONE! "<<endl<<endl;
 cout<<"=================================================================="<<endl;
@@ -123,24 +122,27 @@ while(i+m < iteraciones)
   }
   if(resto==0)
   {
-    //aplica swap;
+    clus.swap(swap_step);
   }
   else
   {
     //aplica move;
     if(kick==0)
     {
-      //aplica tipo depatada =0
+      clus.kick(step_width);
     }
     else
     {
-      //aplica la otra patada
+      clus.kicklenard(step_width);
     }
   }
   system("./run.sh");
-  system("grep 'reached required ' OUTCAR | wc -l > contenido.txt");
-  ifstream cont...
-  //read contenidoi=contenido.txt
+  system("grep 'Have a nice day. ' output.out | wc -l > contenido.txt");
+  ifstream cont("contenido.txt");
+  cont>>contenido;
+  cont.close();
+  system("rm contenido.txt");
+  
 
   while (contenido!=1)
   {
@@ -148,69 +150,74 @@ while(i+m < iteraciones)
 
   if(n>3)  //Esto quiere decir que es bimetalico
   {
-    if(randomness==1)  // fully random
-    {
-      // clus.SRandomGenerator(...)
-    }
-    else //pseudoaleatorio
-    {
-      // clus.RandomGenerator(...)
-    }
-  }
-  else //es monometalico
-  {
-      if(randomness==1)  // fully random
+    	if(randomness==1)  // fully random
       {
-        // clus.SRandomGenerator(...)
+        clus.srand_generator
       }
       else //pseudoaleatorio
       {
-        // clus.RandomGenerator(...)
+        clus.rand_generator
+      }
+  }
+  else //es monometalico
+  {
+      	if(randomness==1)  // fully random
+      {
+        clus.srand_generator
+      }
+      else //pseudoaleatorio
+      {
+        clus.rand_generator
       }
   }
 
   system("./run.sh");
-  system("grep 'reached required ' OUTCAR | wc -l > contenido.txt");
-  ifstream cont...
-  //read contenidoi=contenido.txt
+  system("grep 'Have a nice day. ' output.out | wc -l > contenido.txt");
+  ifstream cont("contenido.txt");
+  cont>>contenido;
+  cont.close();
+  system("rm contenido.txt");
   }
 
   ################################################################################################
   #                                     Save  configuration                                      #
   ################################################################################################
 
-     EnergiaAnterior=$(echo $Energia)
-     Energia=$(tail -1 OSZICAR | awk '{print $5 }')    #Extrae energia del OSZICAR
 
-     echo "$i     $Energia " >> CONTCAR$i
-     N=$(wc -l CONTCAR | awk '{ print $1 }' )
-     tail -$(($N-1)) CONTCAR >> CONTCAR$i  #Renombra los archivos y les agrega la energia
-     mv POSCAR POSCAR$i
-     rm CHG CHGCAR DOSCAR OSZICAR EIGENVAL XDATCAR IBZKPT  PCDAT REPORT WAVECAR *.xml CONTCAR
+EnergiaAnterior=energy;
+system("grep \" | Total energy of the DFT / Hartree-Fock s.c.f. calculation \" output.out | cut -d \":\" -f 2  | cut -d 'e' -f 1 > energy.txt");
+ifstream en("energy.txt");
+en>>energy;
+en.close();
+system("rm energy.txt");
+
+clus.read_fhi("geometry.in.next_step");
+clus.print_xyz("cordinates"+to_string(i)+".xyz".c_str(), energy );
+system("mv output.out output"+to_string(i)+".out".c_str());
+system("mv geometry.in geometry"+to_string(i)+".in".c_str());
+system("echo "+to_string(i)+"  "+to_string(energy)+" >> energies.txt".c_str() );
+
 
   ################################################################################################
   #                                  Metropolis Monte-Carlo                                      #
   ################################################################################################
 
-     accepted=$(python ../programs/metropolis.py $EnergiaAnterior $Energia $Temperature)
 
-        if [ $accepted = true ]
-        then   # La energía ha sido aceptada
-
-          echo "--> Basin Hopping MC criteria: Energy accepted! "
-          echo "--> Finished iteration $i"
-          head -1 CONTCAR$i >> energies.txt
-          tail -$i energies.txt |  sort -nk2 > sorted.txt
-          i=$(($i+1)) #Convergencia lograda, aumenta en 1 el contador
-
-        else
-
-          echo "--> Basin Hopping MC criteria: Energy rejected!"
-          mv CONTCAR$i rejected/CONTCARrejected$i
-          mv POSCAR$i rejected/POSCARrejected$i
-          m=$(($m+1))
-
-        fi
+kBT = 0.00008617 * temperature_K;
+if (pow(e,(EnergiaAnterior-energy)/kBT) > random_number(0,1))
+{
+	cout<<"--> Basin Hopping MC criteria: Energy accepted! "<<endl;
+    cout<<"--> Finished iteration $i"<<endl;
+    system("tail "-$i "energies.txt |  sort -nk2 > sorted.txt");
+    i++;
+}
+else
+{
+	cout<<echo "--> Basin Hopping MC criteria: Energy rejected!"<<endl;
+    system("mv output"$i".out rejected/outputrejected"$i".out");
+    system("mv geometry"$i".in rejected/geometryrejected"$i".in");
+    m++;
+}
 }
 return 0;
 }
