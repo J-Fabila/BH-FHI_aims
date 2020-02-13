@@ -25,8 +25,6 @@ Temperature=float_pipe("grep 'temperature_K' input.bh | awk '{ print $3 }' "); /
 Ncore=int_pipe("grep 'Ncore' input.bh | head -1 | awk '{print $3}' ");
 iteraciones=system("grep 'iterations' input.bh | awk '{ print $3 }' ");
 swap_step=system("grep 'swap_step' input.bh | awk '{ print $3 }' ");
-//path=string_pipe("pwd");
-//cout<<Simbolo_1<<" "<<Simbolo_2<<" "<<N_Simbolo_1<<" "<<N_Simbolo_2<<"  "<<continue_alg<<" "<<initialization_file<<" "<<randomness<<" "<<kick<<" "<<file_name<<" "<<step_width<<" "<<Temperature<<"  "<<iteraciones<<" "<<swap_step<<endl;
 
 if(continue_alg==1)//continue==1 significa que retoma un calculo anterior
 {
@@ -105,13 +103,12 @@ command="mkdir "+file_name+" ; cd "+file_name+" ; mkdir rejected ";
                clus.rand_generator(Simbolo_1,N_Simbolo_1);
             }
          }
-         aux=file_name+"/geometry.tmp";
-         clus.print_fhi(aux);
-         command.clear();  command="cd "+file_name+" ; cat geometry.tmp >> geometry.in ; rm geometry.tmp";
-         system(command.c_str());
+         clus.print_fhi("geometry.tmp");
+         command.clear();  command="cd "+file_name+"  cat ../geometry.tmp > geometry.in ; rm ../geometry.tmp";
+system(command.c_str());
       }
       command.clear();
-      command="cd "+file_name+" ; ./run.sh";
+      command="cd "+file_name+"  ./run.sh";
       system(command.c_str());
       contenido=int_pipe("grep 'Have a nice day' output.out | wc -l");
    }
@@ -183,7 +180,7 @@ while(i+m < iteraciones)
 
   if(N_Simbolo_2>0)
   {
-    	if(randomness==1)  // fully random
+        if(randomness==1)  // fully random
       {
         clus.srand_generator(Simbolo_1,N_Simbolo_1,Simbolo_2,N_Simbolo_2);
       }
@@ -194,7 +191,7 @@ while(i+m < iteraciones)
   }
   else //es monometalico
   {
-      	if(randomness==1)  // fully random
+        if(randomness==1)  // fully random
       {
         clus.srand_generator(Simbolo_1,N_Simbolo_1);
       }
