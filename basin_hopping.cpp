@@ -4,7 +4,7 @@ int N_Simbolo_1, N_Simbolo_2, count, resto;
 string initialization_file, outputfile;
 int continue_alg,  Ncore, randomness, kick, iteraciones,swap_step, contenido, m;
 float step_width, Temperature, Energy, Energia, EnergiaAnterior, k_BT ;
-string file_name, command;
+string file_name, command, aux;
 Cluster clus_1, clus_2, clus;
 int main(int argc, char *argv[])
 {
@@ -15,7 +15,7 @@ Simbolo_1=string_pipe("grep 'cluster_ntyp' input.bh | cut -d '[' -f 2 | cut -d '
 Simbolo_2=string_pipe("grep 'cluster_ntyp' input.bh | cut -d '[' -f 3 | cut -d ':' -f 1 ");
 N_Simbolo_1=int_pipe("grep 'cluster_ntyp' input.bh | cut -d '[' -f 2 | cut -d ':' -f 2 | cut -d ']' -f 1 ");
 N_Simbolo_2=int_pipe("grep 'cluster_ntyp' input.bh | cut -d '[' -f 3 | cut -d ':' -f 2 | cut -d ']' -f 1 ");
-continue_alg=int_pipe("grep 'continue' input.bh | cut -d ' ' -f 3 >> variables");
+continue_alg=int_pipe("grep 'continue' input.bh | cut -d ' ' -f 3 ");
 initialization_file=string_pipe("grep 'initialization_file' input.bh | awk '{print $3}' ");
 randomness=int_pipe("grep 'randomness' input.bh | awk '{print $3}' ");
 kick=int_pipe("grep 'kick_type' input.bh | awk '{print $3}' ");
@@ -25,8 +25,8 @@ Temperature=float_pipe("grep 'temperature_K' input.bh | awk '{ print $3 }' "); /
 Ncore=int_pipe("grep 'Ncore' input.bh | head -1 | awk '{print $3}' ");
 iteraciones=system("grep 'iterations' input.bh | awk '{ print $3 }' ");
 swap_step=system("grep 'swap_step' input.bh | awk '{ print $3 }' ");
-
-cout<<Simbolo_1<<" "<<Simbolo_2<<" "<<N_Simbolo_1<<" "<<N_Simbolo_2<<"  "<<continue_alg<<" "<<initialization_file<<" "<<randomness<<" "<<kick<<" "<<file_name<<" "<<step_width<<" "<<Temperature<<"  "<<iteraciones<<" "<<swap_step<<endl;
+//path=string_pipe("pwd");
+//cout<<Simbolo_1<<" "<<Simbolo_2<<" "<<N_Simbolo_1<<" "<<N_Simbolo_2<<"  "<<continue_alg<<" "<<initialization_file<<" "<<randomness<<" "<<kick<<" "<<file_name<<" "<<step_width<<" "<<Temperature<<"  "<<iteraciones<<" "<<swap_step<<endl;
 
 if(continue_alg==1)//continue==1 significa que retoma un calculo anterior
 {
@@ -51,7 +51,7 @@ else  //quiere decir que empieza desde scratch
   //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
    // Creates work directory
-   command ="if [ -d ";
+/*   command ="if [ -d ";
    command+=file_name;
    command+="] ; then mv ";
    command+=file_name;
@@ -59,11 +59,13 @@ else  //quiere decir que empieza desde scratch
    command+=file_name;
    command+=" ; fi ; cp -r input $";
    command+=file_name;
-cout<<command<<endl;
+cout<<command<<endl;*/
+command="mkdir "+file_name+" ; cd "+file_name+" ; mkdir rejected ";
    system(command.c_str());
    command.clear();
+   command="cp input/* "+file_name;
+   system(command.c_str());
    i=1; m=0;
-   system("cd $file_name ; mkdir rejected");
    contenido=0;
    count=1;
    while(contenido!=1)
@@ -103,10 +105,14 @@ cout<<command<<endl;
                clus.rand_generator(Simbolo_1,N_Simbolo_1);
             }
          }
-         clus.print_fhi("geometry.tmp");
-         system("cat geometry.tmp >> geometry.in ; rm geometry.tmp");
+         aux=file_name+"/geometry.tmp";
+         clus.print_fhi(aux);
+         command.clear();  command="cd "+file_name+" ; cat geometry.tmp >> geometry.in ; rm geometry.tmp";
+         system(command.c_str());
       }
-      system("./run.sh");
+      command.clear();
+      command="cd "+file_name+" ; ./run.sh";
+      system(command.c_str());
       contenido=int_pipe("grep 'Have a nice day' output.out | wc -l");
    }
    Energy=double_pipe("grep \" | Total energy of the DFT / Hartree-Fock s.c.f. calculation \" output.out | cut -d \":\" -f 2 | cut -d \"e\" -f 1 ");
