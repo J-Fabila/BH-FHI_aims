@@ -1,3 +1,4 @@
+
 #include"atomicpp.h"
 string Simbolo_1, Simbolo_2;
 int N_Simbolo_1, N_Simbolo_2, count, resto;
@@ -85,7 +86,7 @@ command="mkdir "+file_name+" ; cd "+file_name+" ; mkdir rejected ";
          {
             if(randomness==1)  // fully random
             {
-               clus.srand_generator(Simbolo_1,N_Simbolo_1,Simbolo_2,N_Simbolo_2);
+               clus.suuuuuuunerator(Simbolo_1,N_Simbolo_1,Simbolo_2,N_Simbolo_2);
             }
             else //pseudoaleatorio
             {
@@ -110,6 +111,7 @@ system(command.c_str());
       command.clear();
       command="cd "+file_name+"  ./run.sh";
       system(command.c_str());
+      command.clear();
       contenido=int_pipe("grep 'Have a nice day' output.out | wc -l");
    }
    Energy=double_pipe("grep \" | Total energy of the DFT / Hartree-Fock s.c.f. calculation \" output.out | cut -d \":\" -f 2 | cut -d \"e\" -f 1 ");
@@ -171,7 +173,9 @@ while(i+m < iteraciones)
       clus.kick_lennard(step_width);
     }
   }
-  system("./run.sh");
+  command="cd "+file_name+"  ./run.sh";
+  system(command.c_str());
+  command.clear();
   contenido=int_pipe("grep 'Have a nice day' output.out | wc -l");
   // Starting randomly if last configuration fails
   while (contenido!=1)
@@ -202,7 +206,9 @@ while(i+m < iteraciones)
   }
   clus.print_fhi("geometry.tmp");
   system("cat geometry.tmp >> geometry.in ; rm geometry.tmp");
-  system("./run.sh");
+  command="cd "+file_name+"  ./run.sh";
+  system(command.c_str());
+  command.clear();
   contenido=int_pipe("grep 'Have a nice day' output.out | wc -l");
   }
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
