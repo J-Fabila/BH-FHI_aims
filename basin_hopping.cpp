@@ -1,4 +1,3 @@
-
 #include"atomicpp.h"
 string Simbolo_1, Simbolo_2;
 int N_Simbolo_1, N_Simbolo_2, count, resto;
@@ -59,7 +58,7 @@ else  //quiere decir que empieza desde scratch
    command+=" ; fi ; cp -r input $";
    command+=file_name;
 cout<<command<<endl;*/
-command="mkdir "+file_name+" ; cd "+file_name+" ; mkdir rejected ";
+command="mkdir "+file_name+"  cd "+file_name+"  mkdir rejected ";
    system(command.c_str());
    command.clear();
    command="cp input/* "+file_name;
@@ -105,9 +104,10 @@ command="mkdir "+file_name+" ; cd "+file_name+" ; mkdir rejected ";
             }
          }
          clus.print_fhi("geometry.tmp");
-         command.clear();  command="cd "+file_name+"  cat ../geometry.tmp > geometry.in ; rm ../geometry.tmp";
-system(command.c_str());
-cout<<"copiando geometry"<<endl;
+         command.clear();
+         command="cd "+file_name+"  cat ../geometry.tmp > geometry.in ; rm ../geometry.tmp";
+         system(command.c_str());
+         cout<<"copiando geometry"<<endl;
       }
       command.clear();
       command="cd "+file_name+"  ./run.sh";
@@ -122,7 +122,7 @@ cout<<"leyendo have a nice day"<<endl;
    command="cd "+file_name+" grep \" | Total energy of the DFT \" output.out | cut -d \":\" -f 2 | cut -d \"e\" -f 1 ";
    Energy=double_pipe(command.c_str());
    command.clear(); command="cd "+file_name+" mv geometry.in.next_step coordinates1.xyz ; mv output.out output1.out ; ";
-   command=" mv geometry.in geometry1.in ; echo Step Energy [eV] >> energies.txt ; echo 1  "+to_string(Energy)+" >> energies.txt";
+   command+=" mv geometry.in geometry1.in ; echo Step Energy [eV] >> energies.txt ; echo 1  "+to_string(Energy)+" >> energies.txt";
    system(command.c_str());
 
    cout<<" --> Relaxation of initial configuration: DONE! "<<endl<<endl;
