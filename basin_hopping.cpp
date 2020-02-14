@@ -4,7 +4,7 @@ int N_Simbolo_1, N_Simbolo_2, count, resto;
 string initialization_file, outputfile;
 int continue_alg,  Ncore, randomness, kick, iteraciones,swap_step, contenido, m;
 float step_width, Temperature, Energy, Energia, EnergiaAnterior, k_BT ;
-string file_name, command, aux;
+string file_name, command, aux,geometry_file;
 Cluster clus_1, clus_2, clus;
 int main(int argc, char *argv[])
 {
@@ -23,8 +23,8 @@ file_name=string_pipe("grep 'file_name' input.bh | awk '{print $3}' ");
 step_width=float_pipe("grep 'step_width' input.bh | awk '{print $3}' "); //o double?
 Temperature=float_pipe("grep 'temperature_K' input.bh | awk '{ print $3 }' "); //o double?
 Ncore=int_pipe("grep 'Ncore' input.bh | head -1 | awk '{print $3}' ");
-iteraciones=system("grep 'iterations' input.bh | awk '{ print $3 }' ");
-swap_step=system("grep 'swap_step' input.bh | awk '{ print $3 }' ");
+iteraciones=int_pipe("grep 'iterations' input.bh | awk '{ print $3 }' ");
+swap_step=int_pipe("grep 'swap_step' input.bh | awk '{ print $3 }' ");
 
 if(continue_alg==1)//continue==1 significa que retoma un calculo anterior
 {
@@ -58,7 +58,7 @@ else  //quiere decir que empieza desde scratch
    command+=" ; fi ; cp -r input $";
    command+=file_name;
 cout<<command<<endl;*/
-command="mkdir "+file_name+"  cd "+file_name+"  mkdir rejected ";
+command="mkdir "+file_name+" ; cd "+file_name+"  ; mkdir rejected ";
    system(command.c_str());
    command.clear();
    command="cp input/* "+file_name;
@@ -68,7 +68,7 @@ command="mkdir "+file_name+"  cd "+file_name+"  mkdir rejected ";
    count=1;
    while(contenido!=1)
    {
-      if(initialization_file>"alse" && count==1)
+      if(initialization_file<"false" && count==1)
       {
       //Inicializa archivo geometry.in
         command ="cp ";
@@ -105,23 +105,23 @@ command="mkdir "+file_name+"  cd "+file_name+"  mkdir rejected ";
          }
          clus.print_fhi("geometry.tmp");
          command.clear();
-         command="cd "+file_name+"  cat ../geometry.tmp > geometry.in ; rm ../geometry.tmp";
+         command="cd "+file_name+" ; cat ../geometry.tmp > geometry.in ; rm ../geometry.tmp"; ///////////////////////////////
          system(command.c_str());
+
          cout<<"copiando geometry"<<endl;
       }
       command.clear();
-      command="cd "+file_name+"  ./run.sh";
+      command="cd "+file_name+" ; ./run.sh";
       system(command.c_str());
       command.clear();
-      command="cd "+file_name+"grep 'Have a nice day' output.out | wc -l";
-      contenido=int_pipe(command);
-cout<<"leyendo have a nice day"<<endl;
+      command="cd "+file_name+" ; grep 'Have a nice day' output.out | wc -l";
+      contenido=int_pipe(command.c_str());
 
    }
    command.clear();
-   command="cd "+file_name+" grep \" | Total energy of the DFT \" output.out | cut -d \":\" -f 2 | cut -d \"e\" -f 1 ";
+   command="cd "+file_name+" ; grep \" | Total energy of the DFT \" output.out | cut -d \":\" -f 2 | cut -d \"e\" -f 1 ";
    Energy=double_pipe(command.c_str());
-   command.clear(); command="cd "+file_name+" mv geometry.in.next_step coordinates1.xyz ; mv output.out output1.out ; ";
+   command.clear(); command="cd "+file_name+" ; mv geometry.in.next_step coordinates1.xyz ; mv output.out output1.out ; ";
    command+=" mv geometry.in geometry1.in ; echo Step Energy [eV] >> energies.txt ; echo 1  "+to_string(Energy)+" >> energies.txt";
    system(command.c_str());
 
@@ -139,16 +139,17 @@ cout<<"leyendo have a nice day"<<endl;
 while(i+m < iteraciones)
 {
   resto=i%swap_step;
+  geometry_file=file_name+"/geometry.in.next_step";
   // Get cluster coordinates from output file
   if(N_Simbolo_2>0) //es bimetalico
   {
-    clus_1=extract(Simbolo_1,"geometry.in.next_step");
-    clus_2=extract(Simbolo_2,"geometry.in.next_step");
+    clus_1=extract(Simbolo_1,geometry_file);
+    clus_2=extract(Simbolo_2,geometry_file);
     clus  =clus_1+clus_2;
   }
   else //es monometalico
   {
-    clus=extract(Simbolo_1,"geometry.in.next_step");
+    clus=extract(Simbolo_1,geometry_file);
   }
   // Applies swap or kick
   if(resto==0)
@@ -174,11 +175,12 @@ while(i+m < iteraciones)
       clus.kick_lennard(step_width);
     }
   }
-  command="cd "+file_name+"  ./run.sh";
+  command="cd "+file_name+" ; ./run.sh";
   system(command.c_str());
   command.clear();
-  contenido=int_pipe("grep 'Have a nice day' output.out | wc -l");
-  // Starting randomly if last configuration fails
+  command="cd "+file_name+" ; grep 'Have a nice day' output.out | wc -l";
+  contenido=int_pipe(command.c_str());
+// Starting randomly if last configuration fails
   while (contenido!=1)
   {
   cout<<" --> SCF failed. Starting again from randomly generated structure! "<<endl;
@@ -206,25 +208,31 @@ while(i+m < iteraciones)
       }
   }
   clus.print_fhi("geometry.tmp");
-  system("cat geometry.tmp >> geometry.in ; rm geometry.tmp");
-  command="cd "+file_name+"  ./run.sh";
+  command.clear();
+  command="cd "+file_name+" ; cat ../geometry.tmp > geometry.in ; rm ../geometry.tmp";
   system(command.c_str());
   command.clear();
-  contenido=int_pipe("grep 'Have a nice day' output.out | wc -l");
+  command="cd "+file_name+" ;  ./run.sh";
+  system(command.c_str());
+  command.clear();
+  command="cd "+file_name+" ; grep 'Have a nice day' output.out | wc -l";
+  contenido=int_pipe(command.c_str());
   }
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 //                                         SAVE ENERGIES                                          //
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 EnergiaAnterior=Energy;
-Energy=float_pipe("grep \" | Total energy of the DFT / Hartree-Fock s.c.f. calculation \" output.out | cut -d \":\" -f 2  | cut -d 'e' -f 1 ");
-clus.read_fhi("geometry.in.next_step");
-outputfile ="coordinates"+to_string(i)+".xyz";
-clus.print_xyz(outputfile);
-command.clear(); command="mv output.out output"+to_string(i)+".out";
+command.clear();
+command="cd "+file_name+" ; grep \" | Total energy of the DFT \" output.out | cut -d \":\" -f 2 | cut -d \"e\" -f 1 ";
+Energy=float_pipe(command.c_str());
+command.clear();
+command="mv "+file_name+"/geometry.in.next_step "+file_name+"/coordinates"+to_string(i)+".xyz";
+clus.print_xyz(command);
+command.clear(); command="mv "+file_name+"/output.out "+file_name+"/output"+to_string(i)+".out";
 system(command.c_str());
-command.clear(); command="mv geometry.in geometry"+to_string(i)+".in";
+command.clear(); command="mv "+file_name+"/geometry.in "+file_name+"/geometry"+to_string(i)+".in";
 system(command.c_str());
-command.clear(); command="echo "+to_string(i)+"  "+to_string(Energy)+" >> energies.txt";
+command.clear(); command="echo "+to_string(i)+"  "+to_string(Energy)+" >> "+file_name+"/energies.txt";
 system(command.c_str() );
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 //                                     Metropolis Monte-Carlo                                     //
@@ -235,16 +243,16 @@ if (pow(2.71,(EnergiaAnterior-Energy)/k_BT) > random_number(0,1))
 {
   cout<<"--> Basin Hopping MC criteria: Energy accepted! "<<endl;
   cout<<"--> Finished iteration $i"<<endl;
-  command.clear(); command="tail -"+to_string(i)+" energies.txt |  sort -nk2 > sorted.txt";
+  command.clear(); command="tail -"+to_string(i)+" "+file_name+"/energies.txt |  sort -nk2 > "+file_name+"/sorted.txt";
   system(command.c_str());
   i++;
 }
 else
 {
   cout<<"--> Basin Hopping MC criteria: Energy rejected!"<<endl;
-  command.clear(); command="mv output"+to_string(i)+".out rejected/outputrejected"+to_string(i)+".out";
+  command.clear(); command="mv "+file_name+"/output"+to_string(i)+".out "+file_name+"/rejected/outputrejected"+to_string(i)+".out";
   system(command.c_str());
-  command.clear(); command="mv geometry"+to_string(i)+".in rejected/geometryrejected"+to_string(i)+".in";
+  command.clear(); command="mv "+file_name+"/geometry"+to_string(i)+".in "+file_name+"/rejected/geometryrejected"+to_string(i)+".in";
   system(command.c_str());
   m++;
 }
