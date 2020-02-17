@@ -1,5 +1,5 @@
 #include"atomicpp.h"
-string Simbolo_1, Simbolo_2, file_name, command, aux,geometry_file, initialization_file, outputfile, i_str, E_str;
+string Simbolo_1, Simbolo_2, file_name, command, aux,geometry_file, initialization_file, outputfile, i_str, E_str, tag;
 int continue_alg,  Ncore, randomness, kick, iteraciones,swap_step, contenido, m, N_Simbolo_1, N_Simbolo_2, count, resto;
 float step_width, Temperature, Energy, Energia, EnergiaAnterior, k_BT ;
 Cluster clus_1, clus_2, clus;
@@ -21,6 +21,8 @@ Temperature=float_pipe("grep 'temperature_K' input.bh | awk '{ print $3 }' "); /
 Ncore=int_pipe("grep 'Ncore' input.bh | head -1 | awk '{print $3}' ");
 iteraciones=int_pipe("grep 'iterations' input.bh | awk '{ print $3 }' ");
 swap_step=int_pipe("grep 'swap_step' input.bh | awk '{ print $3 }' ");
+
+int i = 1;
 
 if(continue_alg==1){
   //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
@@ -51,7 +53,7 @@ else{
    count=1;
    while(contenido!=1)
    {
-      if(initialization_file<"false" && count==1)
+      if(initialization_file > "false" && count==1)
       {
       //Inicializa archivo geometry.in
         command ="cp ";
@@ -102,7 +104,11 @@ else{
    Energy=float_pipe(command.c_str());
    i_str=to_string(i);
    E_str=to_string(Energy);
-   command.clear(); command="cd "+file_name+" ; mv geometry.in.next_step coordinates1.xyz ; mv output.out output1.out ; ";
+   command.clear();
+   command=file_name+"/geometry.in.next_step";
+   clus.read_fhi(command); command.clear(); command=file_name+"/coordinates1.xyz";
+   clus.print_xyz(command);
+   command.clear(); command=" mv output.out output1.out ; ";
    command+=" mv geometry.in geometry1.in ; echo Step Energy [eV] >> energies.txt ; echo 1  "+E_str+" >> energies.txt";
    system(command.c_str());
 
@@ -115,7 +121,7 @@ else{
    cout<<"==================================================================="<<endl<<endl;
    i=2;
 }
-while(i+m < iteraciones)
+while(i+m <= iteraciones)
 {
   resto=i%swap_step;
   geometry_file=file_name+"/geometry.in.next_step";
@@ -124,13 +130,13 @@ while(i+m < iteraciones)
   // Get cluster coordinates from output file
   if(N_Simbolo_2>0) //es bimetalico
   {
-    clus_1=extract(Simbolo_1,geometry_file);
-    clus_2=extract(Simbolo_2,geometry_file);
+    clus_1=extract(geometry_file,Simbolo_1);
+    clus_2=extract(geometry_file,Simbolo_2);
     clus  =clus_1+clus_2;
   }
   else //es monometalico
   {
-    clus=extract(Simbolo_1,geometry_file);
+    clus=extract(geometry_file,Simbolo_1);
   }
   // Applies swap or kick
   if(resto==0)
@@ -199,7 +205,8 @@ while(i+m < iteraciones)
   command.clear();
   command="cd "+file_name+" ; grep 'Have a nice day' output.out | wc -l";
   contenido=int_pipe(command.c_str());
-  }//_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+  }
+//_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 //                                         SAVE ENERGIES                                          //
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 EnergiaAnterior=Energy;
@@ -219,7 +226,6 @@ command.clear(); command="mv "+file_name+"/geometry.in "+file_name+"/geometry"+i
 system(command.c_str());
 command.clear(); command="echo "+i_str+"  "+E_str+" >> "+file_name+"/energies.txt";
 system(command.c_str() );
-
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 //                                     Metropolis Monte-Carlo                                     //
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
