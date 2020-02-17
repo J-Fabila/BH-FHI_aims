@@ -108,7 +108,7 @@ else{
    command=file_name+"/geometry.in.next_step";
    clus.read_fhi(command); command.clear(); command=file_name+"/coordinates1.xyz";
    clus.print_xyz(command);
-   command.clear(); command=" mv output.out output1.out ; ";
+   command.clear(); command="cd "+file_name+" ; mv output.out output1.out ; ";
    command+=" mv geometry.in geometry1.in ; echo Step Energy [eV] >> energies.txt ; echo 1  "+E_str+" >> energies.txt";
    system(command.c_str());
 
