@@ -11,7 +11,7 @@ Simbolo_1=string_pipe("grep 'cluster_ntyp' input.bh | cut -d '[' -f 2 | cut -d '
 Simbolo_2=string_pipe("grep 'cluster_ntyp' input.bh | cut -d '[' -f 3 | cut -d ':' -f 1 ");
 N_Simbolo_1=int_pipe("grep 'cluster_ntyp' input.bh | cut -d '[' -f 2 | cut -d ':' -f 2 | cut -d ']' -f 1 ");
 N_Simbolo_2=int_pipe("grep 'cluster_ntyp' input.bh | cut -d '[' -f 3 | cut -d ':' -f 2 | cut -d ']' -f 1 ");
-continue_alg=int_pipe("grep 'continue' input.bh | cut -d ' ' -f 3 ");
+continue_alg=int_pipe("grep 'continue' input.bh | awk '{print $3}' ");
 initialization_file=string_pipe("grep 'initialization_file' input.bh | awk '{print $3}' ");
 randomness=int_pipe("grep 'randomness' input.bh | awk '{print $3}' ");
 kick=int_pipe("grep 'kick_type' input.bh | awk '{print $3}' ");
@@ -21,7 +21,7 @@ Temperature=float_pipe("grep 'temperature_K' input.bh | awk '{ print $3 }' "); /
 Ncore=int_pipe("grep 'Ncore' input.bh | head -1 | awk '{print $3}' ");
 iteraciones=int_pipe("grep 'iterations' input.bh | awk '{ print $3 }' ");
 swap_step=int_pipe("grep 'swap_step' input.bh | awk '{ print $3 }' ");
-
+cout<<"Continue = "<<continue_alg<<endl;
 int i = 1;
 
 if(continue_alg==1){
@@ -53,8 +53,9 @@ else{
    count=1;
    while(contenido!=1)
    {
-      if(initialization_file > "false" && count==1)
+      if(initialization_file.length() > 5 && count==1)
       {
+      cout<<"Initialization file = "<<initialization_file<<endl;
       //Inicializa archivo geometry.in
         command ="cp ";
         command+=initialization_file;
@@ -107,7 +108,9 @@ else{
    command.clear();
    command=file_name+"/geometry.in.next_step";
    clus.read_fhi(command); command.clear(); command=file_name+"/coordinates1.xyz";
-   clus.print_xyz(command);
+   tag.clear();
+   tag=" Iteration "+i_str+" -----> Energy = "+E_str+" eV ";
+   clus.print_xyz(command,tag);
    command.clear(); command="cd "+file_name+" ; mv output.out output1.out ; ";
    command+=" mv geometry.in geometry1.in ; echo Step Energy [eV] >> energies.txt ; echo 1  "+E_str+" >> energies.txt";
    system(command.c_str());
@@ -124,6 +127,7 @@ else{
 while(i+m <= iteraciones)
 {
   resto=i%swap_step;
+  geometry_file.clear();
   geometry_file=file_name+"/geometry.in.next_step";
   i_str.clear(); E_str.clear();
   i_str=to_string(i);
@@ -139,9 +143,11 @@ while(i+m <= iteraciones)
     clus=extract(geometry_file,Simbolo_1);
   }
   // Applies swap or kick
-  if(resto==0)
+  if(resto==0 && N_Simbolo_2 > 0)
   {
-    if(N_Simbolo_1>N_Simbolo_2)
+   cout<<"Applying swap step"<<endl;
+   clus.type = "bimetallic";
+    if(N_Simbolo_1>=N_Simbolo_2)
     {
        clus.swap(N_Simbolo_1);
     }
@@ -155,10 +161,12 @@ while(i+m <= iteraciones)
     //aplica move;
     if(kick==0)
     {
+      cout<<"Kicking without potential"<<endl;
       clus.kick(step_width);
     }
     else
     {
+      cout<<"Kicking with lennard potential"<<endl;
       clus.kick_lennard(step_width);
     }
   }
