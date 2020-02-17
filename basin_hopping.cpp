@@ -1,5 +1,5 @@
 #include"atomicpp.h"
-string Simbolo_1, Simbolo_2, file_name, command, aux,geometry_file, initialization_file, outputfile;
+string Simbolo_1, Simbolo_2, file_name, command, aux,geometry_file, initialization_file, outputfile, i_str, E_str;
 int continue_alg,  Ncore, randomness, kick, iteraciones,swap_step, contenido, m, N_Simbolo_1, N_Simbolo_2, count, resto;
 float step_width, Temperature, Energy, Energia, EnergiaAnterior, k_BT ;
 Cluster clus_1, clus_2, clus;
@@ -56,7 +56,7 @@ else{
       //Inicializa archivo geometry.in
         command ="cp ";
         command+=initialization_file;
-        command+=" geometry.in";
+        command+=" "+file_name+"/geometry.in";
         system(command.c_str());
         command.clear();
         count++;
@@ -86,12 +86,9 @@ else{
                clus.rand_generator(Simbolo_1,N_Simbolo_1);
             }
          }
-         clus.print_fhi("geometry.tmp");
-         command.clear();
-         command="cd "+file_name+" ; cat ../geometry.tmp > geometry.in ; rm ../geometry.tmp"; ///////////////////////////////
-         system(command.c_str());
-
-         cout<<"copiando geometry"<<endl;
+         geometry_file.clear();
+         geometry_file=file_name+"/geometry.in";
+         clus.print_fhi(geometry_file);
       }
       command.clear();
       command="cd "+file_name+" ; ./run.sh";
@@ -102,9 +99,11 @@ else{
    }
    command.clear();
    command="cd "+file_name+" ; grep \" | Total energy of the DFT \" output.out | cut -d \":\" -f 2 | cut -d \"e\" -f 1 ";
-   Energy=double_pipe(command.c_str());
+   Energy=float_pipe(command.c_str());
+   i_str=to_string(i);
+   E_str=to_string(Energy);
    command.clear(); command="cd "+file_name+" ; mv geometry.in.next_step coordinates1.xyz ; mv output.out output1.out ; ";
-   command+=" mv geometry.in geometry1.in ; echo Step Energy [eV] >> energies.txt ; echo 1  "+to_string(Energy)+" >> energies.txt";
+   command+=" mv geometry.in geometry1.in ; echo Step Energy [eV] >> energies.txt ; echo 1  "+E_str+" >> energies.txt";
    system(command.c_str());
 
    cout<<" --> Relaxation of initial configuration: DONE! "<<endl<<endl;
@@ -112,7 +111,7 @@ else{
    cout<<"BH-DFT routine starts here! "<<endl;
    cout<<"Note: "<<endl;
    cout<<"For monometallic clusters: only random xyz moves will be applied "<<endl;
-   cout<<"For bimetallic clusters  : 1 atomic swap will be performed after 10 moves "<<endl;
+   cout<<"For bimetallic clusters  : 1 atomic swap will be performed after "<<swap_step<<" moves "<<endl;
    cout<<"==================================================================="<<endl<<endl;
    i=2;
 }
@@ -120,6 +119,8 @@ while(i+m < iteraciones)
 {
   resto=i%swap_step;
   geometry_file=file_name+"/geometry.in.next_step";
+  i_str.clear(); E_str.clear();
+  i_str=to_string(i);
   // Get cluster coordinates from output file
   if(N_Simbolo_2>0) //es bimetalico
   {
@@ -155,6 +156,10 @@ while(i+m < iteraciones)
       clus.kick_lennard(step_width);
     }
   }
+  geometry_file.clear();
+  geometry_file=file_name+"/geometry.in";
+  clus.print_fhi(geometry_file);
+  command.clear();
   command="cd "+file_name+" ; ./run.sh";
   system(command.c_str());
   command.clear();
@@ -164,7 +169,7 @@ while(i+m < iteraciones)
   while (contenido!=1)
   {
   cout<<" --> SCF failed. Starting again from randomly generated structure! "<<endl;
-
+// sera necesario borrar geometry.in???
   if(N_Simbolo_2>0)
   {
         if(randomness==1)  // fully random
@@ -187,10 +192,7 @@ while(i+m < iteraciones)
         clus.rand_generator(Simbolo_1,N_Simbolo_1);
       }
   }
-  clus.print_fhi("geometry.tmp");
-  command.clear();
-  command="cd "+file_name+" ; cat ../geometry.tmp > geometry.in ; rm ../geometry.tmp";
-  system(command.c_str());
+  clus.print_fhi(geometry_file);
   command.clear();
   command="cd "+file_name+" ;  ./run.sh";
   system(command.c_str());
@@ -205,15 +207,16 @@ EnergiaAnterior=Energy;
 command.clear();
 command="cd "+file_name+" ; grep \" | Total energy of the DFT \" output.out | cut -d \":\" -f 2 | cut -d \"e\" -f 1 ";
 Energy=float_pipe(command.c_str());
+E_str=to_string(Energy);
 command.clear();
-command="mv "+file_name+"/geometry.in.next_step "+file_name+"/coordinates"+to_string(i)+".xyz";
-tag.clear(); tag=" Iteration "+to_string(i)+" -----> Energy = "+to_string(Energy)+" eV ";
+command="mv "+file_name+"/geometry.in.next_step "+file_name+"/coordinates"+i_str+".xyz";
+tag.clear(); tag=" Iteration "+i_str+" -----> Energy = "+E_str+" eV ";
 clus.print_xyz(command,tag);
-command.clear(); command="mv "+file_name+"/output.out "+file_name+"/output"+to_string(i)+".out";
+command.clear(); command="mv "+file_name+"/output.out "+file_name+"/output"+i_str+".out";
 system(command.c_str());
-command.clear(); command="mv "+file_name+"/geometry.in "+file_name+"/geometry"+to_string(i)+".in";
+command.clear(); command="mv "+file_name+"/geometry.in "+file_name+"/geometry"+i_str+".in";
 system(command.c_str());
-command.clear(); command="echo "+to_string(i)+"  "+to_string(Energy)+" >> "+file_name+"/energies.txt";
+command.clear(); command="echo "+i_str+"  "+E_str+" >> "+file_name+"/energies.txt";
 system(command.c_str() );
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 //                                     Metropolis Monte-Carlo                                     //
@@ -223,16 +226,16 @@ if (pow(2.71,(EnergiaAnterior-Energy)/k_BT) > random_number(0,1))
 {
   cout<<"--> Basin Hopping MC criteria: Energy accepted! "<<endl;
   cout<<"--> Finished iteration "<<i<<endl;
-  command.clear(); command="tail -"+to_string(i)+" "+file_name+"/energies.txt |  sort -nk2 > "+file_name+"/sorted.txt";
+  command.clear(); command="tail -"+i_str+" "+file_name+"/energies.txt |  sort -nk2 > "+file_name+"/sorted.txt";
   system(command.c_str());
   i++;
 }
 else
 {
   cout<<"--> Basin Hopping MC criteria: Energy rejected!"<<endl;
-  command.clear(); command="mv "+file_name+"/output"+to_string(i)+".out "+file_name+"/rejected/outputrejected"+to_string(i)+".out";
+  command.clear(); command="mv "+file_name+"/output"+i_str+".out "+file_name+"/rejected/outputrejected"+i_str+".out";
   system(command.c_str());
-  command.clear(); command="mv "+file_name+"/geometry"+to_string(i)+".in "+file_name+"/rejected/geometryrejected"+to_string(i)+".in";
+  command.clear(); command="mv "+file_name+"/geometry"+i_str+".in "+file_name+"/rejected/geometryrejected"+i_str+".in";
   system(command.c_str());
   m++;
 }
