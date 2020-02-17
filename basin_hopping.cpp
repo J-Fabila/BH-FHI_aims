@@ -49,19 +49,10 @@ else  //quiere decir que empieza desde scratch
   //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
    // Creates work directory
-/*   command ="if [ -d ";
-   command+=file_name;
-   command+="] ; then mv ";
-   command+=file_name;
-   command+=" other_$";
-   command+=file_name;
-   command+=" ; fi ; cp -r input $";
-   command+=file_name;
-cout<<command<<endl;*/
-command="mkdir "+file_name+" ; cd "+file_name+"  ; mkdir rejected ";
-   system(command.c_str());
-   command.clear();
-   command="cp input/* "+file_name;
+   command ="if [ -d "+file_name+" ] ; then mv "+file_name+" other_"+file_name;
+   command+=" ; fi ; mkdir "+file_name+" ; cd "+file_name+"  ; mkdir rejected ;";
+   //system(command.c_str()); command.clear(); command="cd input ; echo 'running command' >> run.sh "; system(command.c_str()); command.clear();
+   command+=" cp ../input/* .";
    system(command.c_str());
    i=1; m=0;
    contenido=0;
