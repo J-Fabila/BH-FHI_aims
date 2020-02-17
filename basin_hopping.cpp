@@ -1,13 +1,9 @@
 #include"atomicpp.h"
-string Simbolo_1, Simbolo_2;
-int N_Simbolo_1, N_Simbolo_2, count, resto;
-string initialization_file, outputfile;
-int continue_alg,  Ncore, randomness, kick, iteraciones,swap_step, contenido, m;
+string Simbolo_1, Simbolo_2, file_name, command, aux,geometry_file, initialization_file, outputfile;
+int continue_alg,  Ncore, randomness, kick, iteraciones,swap_step, contenido, m, N_Simbolo_1, N_Simbolo_2, count, resto;
 float step_width, Temperature, Energy, Energia, EnergiaAnterior, k_BT ;
-string file_name, command, aux,geometry_file;
 Cluster clus_1, clus_2, clus;
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]){
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 //                                    Gets data from input.bh                                     //
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
@@ -26,12 +22,10 @@ Ncore=int_pipe("grep 'Ncore' input.bh | head -1 | awk '{print $3}' ");
 iteraciones=int_pipe("grep 'iterations' input.bh | awk '{ print $3 }' ");
 swap_step=int_pipe("grep 'swap_step' input.bh | awk '{ print $3 }' ");
 
-if(continue_alg==1)//continue==1 significa que retoma un calculo anterior
-{
+if(continue_alg==1){
   //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
   //                                      RESTART ALGORITHM                                         //
   //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
-
       string iteration_counter_i ="cd ";
              iteration_counter_i+=file_name;
              iteration_counter_i+=" ; for i in $(ls coord*xyz ); do head -2 $i | tail -1 | awk '{ print $2 }' ; done | sort -n  | tail -1";
@@ -42,12 +36,10 @@ if(continue_alg==1)//continue==1 significa que retoma un calculo anterior
              iteration_counter_m+="/rejected ; ls coord*xyz 2> /dev/null | wc -l ";
   m=int_pipe(iteration_counter_m,0);
 }
-else  //quiere decir que empieza desde scratch
-{
+else{
   //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
   //                                        BEGIN ALGORITHM                                         //
   //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
-
    // Creates work directory
    command ="if [ -d "+file_name+" ] ; then mv "+file_name+" other_"+file_name;
    command+=" ; fi ; mkdir "+file_name+" ; cd "+file_name+"  ; mkdir rejected ;";
@@ -107,7 +99,6 @@ else  //quiere decir que empieza desde scratch
       command.clear();
       command="cd "+file_name+" ; grep 'Have a nice day' output.out | wc -l";
       contenido=int_pipe(command.c_str());
-
    }
    command.clear();
    command="cd "+file_name+" ; grep \" | Total energy of the DFT \" output.out | cut -d \":\" -f 2 | cut -d \"e\" -f 1 ";
@@ -123,10 +114,8 @@ else  //quiere decir que empieza desde scratch
    cout<<"For monometallic clusters: only random xyz moves will be applied "<<endl;
    cout<<"For bimetallic clusters  : 1 atomic swap will be performed after 10 moves "<<endl;
    cout<<"==================================================================="<<endl<<endl;
-
    i=2;
 }
-
 while(i+m < iteraciones)
 {
   resto=i%swap_step;
@@ -229,7 +218,6 @@ system(command.c_str() );
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 //                                     Metropolis Monte-Carlo                                     //
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
-
 k_BT = 0.00008617 * Temperature;
 if (pow(2.71,(EnergiaAnterior-Energy)/k_BT) > random_number(0,1))
 {
@@ -248,7 +236,6 @@ else
   system(command.c_str());
   m++;
 }
-
 }
 return 0;
 }
