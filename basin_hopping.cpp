@@ -199,8 +199,7 @@ while(i+m < iteraciones)
   command.clear();
   command="cd "+file_name+" ; grep 'Have a nice day' output.out | wc -l";
   contenido=int_pipe(command.c_str());
-  }
-//_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+  }//_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 //                                         SAVE ENERGIES                                          //
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 EnergiaAnterior=Energy;
@@ -209,7 +208,9 @@ command="cd "+file_name+" ; grep \" | Total energy of the DFT \" output.out | cu
 Energy=float_pipe(command.c_str());
 E_str=to_string(Energy);
 command.clear();
-command="mv "+file_name+"/geometry.in.next_step "+file_name+"/coordinates"+i_str+".xyz";
+command=file_name+"/geometry.in.next_step";
+clus.read_fhi(command); command.clear();
+command=file_name+"/coordinates"+i_str+".xyz";
 tag.clear(); tag=" Iteration "+i_str+" -----> Energy = "+E_str+" eV ";
 clus.print_xyz(command,tag);
 command.clear(); command="mv "+file_name+"/output.out "+file_name+"/output"+i_str+".out";
@@ -218,6 +219,7 @@ command.clear(); command="mv "+file_name+"/geometry.in "+file_name+"/geometry"+i
 system(command.c_str());
 command.clear(); command="echo "+i_str+"  "+E_str+" >> "+file_name+"/energies.txt";
 system(command.c_str() );
+
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 //                                     Metropolis Monte-Carlo                                     //
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
