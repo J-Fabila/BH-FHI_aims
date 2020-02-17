@@ -34,7 +34,7 @@ if(continue_alg==1)//continue==1 significa que retoma un calculo anterior
 
       string iteration_counter_i ="cd ";
              iteration_counter_i+=file_name;
-             iteration_counter_i+=" ; for i in $(ls coord*xyz ); do head -1 $i | awk '{ print $1 }' ; done | sort -n  | tail -1";
+             iteration_counter_i+=" ; for i in $(ls coord*xyz ); do head -2 $i | tail -1 | awk '{ print $2 }' ; done | sort -n  | tail -1";
   i=int_pipe(iteration_counter_i,1);
 
       string iteration_counter_m ="cd ";
@@ -179,7 +179,7 @@ while(i+m < iteraciones)
   system(command.c_str());
   command.clear();
   command="cd "+file_name+" ; grep 'Have a nice day' output.out | wc -l";
-  contenido=int_pipe(command.c_str());
+  contenido=int_pipe(command);
 // Starting randomly if last configuration fails
   while (contenido!=1)
   {
@@ -227,7 +227,8 @@ command="cd "+file_name+" ; grep \" | Total energy of the DFT \" output.out | cu
 Energy=float_pipe(command.c_str());
 command.clear();
 command="mv "+file_name+"/geometry.in.next_step "+file_name+"/coordinates"+to_string(i)+".xyz";
-clus.print_xyz(command);
+tag.clear(); tag=" Iteration "+to_string(i)+" -----> Energy = "+to_string(Energy)+" eV ";
+clus.print_xyz(command,tag);
 command.clear(); command="mv "+file_name+"/output.out "+file_name+"/output"+to_string(i)+".out";
 system(command.c_str());
 command.clear(); command="mv "+file_name+"/geometry.in "+file_name+"/geometry"+to_string(i)+".in";
@@ -242,7 +243,7 @@ k_BT = 0.00008617 * Temperature;
 if (pow(2.71,(EnergiaAnterior-Energy)/k_BT) > random_number(0,1))
 {
   cout<<"--> Basin Hopping MC criteria: Energy accepted! "<<endl;
-  cout<<"--> Finished iteration $i"<<endl;
+  cout<<"--> Finished iteration "<<i<<endl;
   command.clear(); command="tail -"+to_string(i)+" "+file_name+"/energies.txt |  sort -nk2 > "+file_name+"/sorted.txt";
   system(command.c_str());
   i++;
