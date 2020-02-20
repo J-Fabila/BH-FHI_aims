@@ -21,6 +21,7 @@ Temperature=float_pipe("grep 'temperature_K' input.bh | awk '{ print $3 }' "); /
 Ncore=int_pipe("grep 'Ncore' input.bh | head -1 | awk '{print $3}' ");
 iteraciones=int_pipe("grep 'iterations' input.bh | awk '{ print $3 }' ");
 swap_step=int_pipe("grep 'swap_step' input.bh | awk '{ print $3 }' ");
+crystal=int_pipe("if [ -f crystal.in ]  ; then echo 1  ;  fi");
 cout<<"Continue = "<<continue_alg<<endl;
 int i = 1;
 
@@ -89,9 +90,20 @@ else{
                clus.rand_generator(Simbolo_1,N_Simbolo_1);
             }
          }
-         geometry_file.clear();
-         geometry_file=file_name+"/geometry.in";
-         clus.print_fhi(geometry_file);
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+         if(crystal==0){
+            geometry_file.clear();
+            geometry_file=file_name+"/geometry.in";
+            clus.print_fhi(geometry_file);
+         }
+         else{
+            geometry_file.clear();
+            geometry_file=file_name+"/geometry.tmp";
+            clus.print_fhi(geometry_file);
+            command.clear(); command="cd "+file_name+" ; cat crystal.in > geometry.in ; cat geometry.tmp >> geometry.in ; rm geometry.tmp ";
+            system(command.c_str());
+         }
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       }
       command.clear();
       command="cd "+file_name+" ; ./run.sh";
@@ -170,9 +182,20 @@ while(i+m <= iteraciones)
       clus.kick_lennard(step_width);
     }
   }
-  geometry_file.clear();
-  geometry_file=file_name+"/geometry.in";
-  clus.print_fhi(geometry_file);
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  if(crystal==0){
+      geometry_file.clear();
+      geometry_file=file_name+"/geometry.in";
+      clus.print_fhi(geometry_file);
+  }
+  else{
+      geometry_file.clear();
+      geometry_file=file_name+"/geometry.tmp";
+      clus.print_fhi(geometry_file);
+      command.clear(); command="cd "+file_name+" ; cat crystal.in > geometry.in ; cat geometry.tmp >> geometry.in ; rm geometry.tmp ";
+      system(command.c_str());
+  }
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   command.clear();
   command="cd "+file_name+" ; ./run.sh";
   system(command.c_str());
@@ -206,7 +229,20 @@ while(i+m <= iteraciones)
         clus.rand_generator(Simbolo_1,N_Simbolo_1);
       }
   }
-  clus.print_fhi(geometry_file);
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  if(crystal==0){
+      geometry_file.clear();
+      geometry_file=file_name+"/geometry.in";
+      clus.print_fhi(geometry_file);
+  }
+  else{
+      geometry_file.clear();
+      geometry_file=file_name+"/geometry.tmp";
+      clus.print_fhi(geometry_file);
+      command.clear(); command="cd "+file_name+" ; cat crystal.in > geometry.in ; cat geometry.tmp >> geometry.in ; rm geometry.tmp ";
+      system(command.c_str());
+  }
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   command.clear();
   command="cd "+file_name+" ;  ./run.sh";
   system(command.c_str());
