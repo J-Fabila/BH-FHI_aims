@@ -1,6 +1,7 @@
+/// De ser necesario agregar una celda como en VASP, que se ponga en geometry.in. En el 'else' de crystal==0 sustituye el '>' por '>>'
 #include"atomicpp.h"
 string Simbolo_1, Simbolo_2, file_name, command, aux,geometry_file, initialization_file, outputfile, i_str, E_str, tag;
-int continue_alg,  Ncore, randomness, kick, iteraciones,swap_step, contenido, m, N_Simbolo_1, N_Simbolo_2, count, resto;
+int continue_alg,  Ncore, randomness, kick, iteraciones,swap_step, contenido, m, N_Simbolo_1, N_Simbolo_2, count, resto, crystal;
 float step_width, Temperature, Energy, Energia, EnergiaAnterior, k_BT ;
 Cluster clus_1, clus_2, clus;
 int main(int argc, char *argv[]){
@@ -21,7 +22,7 @@ Temperature=float_pipe("grep 'temperature_K' input.bh | awk '{ print $3 }' "); /
 Ncore=int_pipe("grep 'Ncore' input.bh | head -1 | awk '{print $3}' ");
 iteraciones=int_pipe("grep 'iterations' input.bh | awk '{ print $3 }' ");
 swap_step=int_pipe("grep 'swap_step' input.bh | awk '{ print $3 }' ");
-crystal=int_pipe("if [ -f crystal.in ]  ; then echo 1  ;  fi");
+crystal=int_pipe("cd input ; if [ -f crystal.in ]  ; then echo 1  ;  fi ");
 cout<<"Continue = "<<continue_alg<<endl;
 int i = 1;
 
