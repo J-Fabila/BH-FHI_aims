@@ -3,8 +3,9 @@ string Simbolo_1, Simbolo_2, file_name, command, aux,geometry_file, initializati
 int continue_alg,  Ncore, randomness, kick, iteraciones,swap_step, contenido, m, N_Simbolo_1, N_Simbolo_2, count, fail_counter=0, resto, failed_max,crystal;
 float step_width, Temperature, Energy, Energia, EnergiaAnterior, k_BT, damp ;
 float x_min,y_min,z_min,x_max,y_max,z_max;
-Cluster clus_1, clus_2, clus;
+Cluster clus_1, clus_2, clus, c_aux;
 Crystal cristal;
+float dist=1.0;
 int main(int argc, char *argv[]){
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 //                                    Gets data from input.bh                                     //
@@ -28,10 +29,9 @@ cout<<"Continue = "<<continue_alg<<endl;
 failed_max=3;
 damp=0.0;
 
-if(crystal==1){  //Esto sustituye tener que poner [x_min,x_max]; [y_min,y_max]... en el input
+if(crystal==1)  //Esto sustituye tener que poner [x_min,x_max]; [y_min,y_max]... en el input
 {
-  geometry_file.clear(); geometry_file=file_name+"/crystal.in";
-  cristal.read_fhi(geometry_file); geometry_file.clear();
+  cristal.read_fhi("input/crystal.in");
   x_min=cristal.x_min();
   x_max=cristal.x_max();
   y_min=cristal.y_min();
@@ -113,7 +113,7 @@ else{
             clus.print_fhi(geometry_file);
          }
          else{
-            clus.move((x_max-x_min)/2.0+random_number(-2.0,2.0),(y_max-y_min)/2.0+random_number(-2.0,2.0),z_max-clus.z_min());
+            clus.move((x_max-x_min)/2.0+random_number(-dist,dist),(y_max-y_min)/2.0+random_number(-dist,dist),z_max-clus.z_min());
             geometry_file.clear();
             geometry_file=file_name+"/geometry.tmp";
             clus.print_fhi(geometry_file);
@@ -206,7 +206,7 @@ while(i+m <= iteraciones)
       clus.print_fhi(geometry_file);
   }
   else{
-      clus.move((x_max-x_min)/2.0+random_number(-2.0,2.0),(y_max-y_min)/2.0+random_number(-2.0,2.0),z_max-clus.z_min() );
+      clus.move((x_max-x_min)/2.0+random_number(-dist,dist),(y_max-y_min)/2.0+random_number(-dist,dist),z_max-clus.z_min() );
       geometry_file.clear();
       geometry_file=file_name+"/geometry.tmp";
       clus.print_fhi(geometry_file);
@@ -228,9 +228,11 @@ while(i+m <= iteraciones)
   {
      cout<<" Kicking ... again"<<endl;
      fail_counter++;
-     geometry_file.clear(); geometry_file=file_name+"/coordinates"+i_str+".xyz"
-     aux.read_xyz(geometry_file);
-     geometry_file.clear(); geometry_file="aux.fhi"; aux.print_fhi(geometry_file);
+     geometry_file.clear(); geometry_file=file_name+"/coordinates"+i_str+".xyz";
+     c_aux.read_xyz(geometry_file);
+     geometry_file.clear();
+     geometry_file="aux.fhi";
+     c_aux.print_fhi(geometry_file);
      if(N_Simbolo_2>0) //es bimetalico
      {
        clus_1=extract(geometry_file,Simbolo_1);
@@ -303,7 +305,7 @@ while(i+m <= iteraciones)
       clus.print_fhi(geometry_file);
   }
   else{
-      clus.move((x_max-x_min)/2.0+random_number(-2.0,2.0),(y_max-y_min)/2.0+random_number(-2.0,2.0),z_max-clus.z_min() );
+      clus.move((x_max-x_min)/2.0+random_number(-dist,dist),(y_max-y_min)/2.0+random_number(-dist,dist),z_max-clus.z_min() );
       geometry_file.clear();
       geometry_file=file_name+"/geometry.tmp";
       clus.print_fhi(geometry_file);
