@@ -30,7 +30,8 @@ damp=0.0;
 
 if(crystal==1){  //Esto sustituye tener que poner [x_min,x_max]; [y_min,y_max]... en el input
 {
-  cristal.read_fhi("crystal.in");
+  geometry_file.clear(); geometry_file=file_name+"/crystal.in";
+  cristal.read_fhi(geometry_file); geometry_file.clear();
   x_min=cristal.x_min();
   x_max=cristal.x_max();
   y_min=cristal.y_min();
