@@ -135,7 +135,13 @@ else{
    E_str=string_pipe(command); //Better for Eneregies with all the value
    command.clear();
    command=file_name+"/geometry.in.next_step";
-   clus.read_fhi(command);
+  
+  
+  //cout<<command<<endl;
+  //////////////////////////////////////
+   clus.read_fhi(command);      //////// Puede no estar leyendo el archivo correcto (geometry.in.next_step)
+  //////////////////////////////////////
+  
    command.clear();
    command=file_name+"/coordinates1.xyz";
    tag.clear();
@@ -161,12 +167,15 @@ while(i+m <= iteraciones)
   resto=i%swap_step;
   geometry_file.clear();
   geometry_file=file_name+"/geometry.in.next_step";
+  command.clear(); command="cat "+geometry_file;
+  system(command.c_str());
+  command.clear();
   i_str.clear();
   E_str.clear();
   i_str=to_string(i);
   // Get cluster coordinates from output file
   if(N_Simbolo_2>0) //es bimetalico
-  {
+  {    
     clus_1=extract(geometry_file,Simbolo_1);
     clus_2=extract(geometry_file,Simbolo_2);
     clus  =clus_1+clus_2;
