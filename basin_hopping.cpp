@@ -8,7 +8,7 @@ float step_width, Temperature, Energy, Energia, EnergiaAnterior, k_BT, damp ;
 float x_min,y_min,z_min,x_max,y_max,z_max;
 Cluster clus_1, clus_2, clus, c_aux;
 Crystal cristal;
-float dist=1.0;
+float dist=0.0;
 int main(int argc, char *argv[]){
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 //                                    Gets data from input.bh                                     //
@@ -30,6 +30,7 @@ swap_step=int_pipe("grep 'swap_step' input.bh | awk '{ print $3 }' ");
 crystal=int_pipe("cd input ; if [ -f crystal.in ]  ; then echo 1  ;  fi ");
 failed_max=3;
 damp=0.0;
+cout<<Simbolo_1<<"  "<<Simbolo_2<<"  "<<kick<<" "<<randomness<<endl;
 //Put if crystal==1 and a grep in input.bh were is indicated supported or not??
 if(crystal==1)  //Esto sustituye tener que poner [x_min,x_max]; [y_min,y_max]... en el input
 {
@@ -116,6 +117,7 @@ else
             clus.print_fhi(geometry_file);
          }
          else{
+            clus.centroid();
             clus.move((x_max-x_min)/2.0+random_number(-dist,dist),(y_max-y_min)/2.0+random_number(-dist,dist),z_max-clus.z_min());
             geometry_file.clear();
             geometry_file="geometry.tmp";
@@ -295,6 +297,7 @@ while(i+m <= iteraciones)
   //.. or periodic case:
   else
    {
+      clus.centroid();
       clus.move((x_max-x_min)/2.0+random_number(-dist,dist),(y_max-y_min)/2.0+random_number(-dist,dist),z_max-clus.z_min() );
       geometry_file.clear();
       geometry_file="geometry.tmp";
@@ -422,6 +425,7 @@ while(i+m <= iteraciones)
   }
 
   else{
+      clus.centroid();
       clus.move((x_max-x_min)/2.0+random_number(-dist,dist),(y_max-y_min)/2.0+random_number(-dist,dist),z_max-clus.z_min() );
       geometry_file.clear();
       geometry_file="geometry.tmp";
