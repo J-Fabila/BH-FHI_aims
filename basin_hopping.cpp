@@ -8,7 +8,7 @@ float step_width, Temperature, Energy, Energia, EnergiaAnterior, k_BT, damp ;
 float x_min,y_min,z_min,x_max,y_max,z_max;
 Cluster clus_1, clus_2, clus, c_aux;
 Crystal cristal;
-float dist=0.0;
+float dist;
 int main(int argc, char *argv[]){
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 //                                    Gets data from input.bh                                     //
@@ -19,6 +19,7 @@ N_Simbolo_1=int_pipe("grep 'cluster_ntyp' input.bh | cut -d '[' -f 2 | cut -d ':
 N_Simbolo_2=int_pipe("grep 'cluster_ntyp' input.bh | cut -d '[' -f 3 | cut -d ':' -f 2 | cut -d ']' -f 1 ");
 continue_alg=int_pipe("grep 'continue' input.bh | awk '{print $3}' ");
 initialization_file=string_pipe("grep 'initialization_file' input.bh | awk '{print $3}' ");
+spin_initialization=string_pipe("grep 'spin_initialization' input.bh | awk '{print $3}' ");
 randomness=int_pipe("grep 'randomness' input.bh | awk '{print $3}' ");
 kick=int_pipe("grep 'kick_type' input.bh | awk '{print $3}' ");
 file_name=string_pipe("grep 'file_name' input.bh | awk '{print $3}' ");
@@ -28,9 +29,11 @@ Ncore=int_pipe("grep 'Ncore' input.bh | head -1 | awk '{print $3}' ");
 iteraciones=int_pipe("grep 'iterations' input.bh | awk '{ print $3 }' ");
 swap_step=int_pipe("grep 'swap_step' input.bh | awk '{ print $3 }' ");
 crystal=int_pipe("cd input ; if [ -f crystal.in ]  ; then echo 1  ;  fi ");
+dist=float_pipe("grep 'displacement' input.bh | awk '{print $3}' ");
+////////////////////////////////////
 failed_max=3;
 damp=0.0;
-cout<<Simbolo_1<<"  "<<Simbolo_2<<"  "<<kick<<" "<<randomness<<endl;
+///////////////////////////////////
 //Put if crystal==1 and a grep in input.bh were is indicated supported or not??
 if(crystal==1)  //Esto sustituye tener que poner [x_min,x_max]; [y_min,y_max]... en el input
 {
@@ -49,12 +52,20 @@ if(continue_alg==1)
   //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
   //                                      RESTART ALGORITHM                                         //
   //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
-      chdir(file_name.c_str());
-      string iteration_counter_i ="ls coord*xyz | wc -l";
-      i=int_pipe(iteration_counter_i);
 
-      string iteration_counter_m ="ls ./rejected/coord*xyz | wc -l ";
-      m=int_pipe(iteration_counter_m);
+      string iteration_counter_i ="cd ";
+             iteration_counter_i+=file_name;
+             iteration_counter_i+=" ; for i in $(ls coord*xyz ); do head -1 $i | awk '{ print $1 }' ; done | sort -n  | tail -1";
+  i=int_pipe(iteration_counter_i,1);
+      string iteration_counter_m ="cd ";
+             iteration_counter_m+=file_name;
+             iteration_counter_m+="/rejected ; ls coord*xyz 2> /dev/null | wc -l ";
+  m=int_pipe(iteration_counter_m,0);
+
+  command.clear(); command="cd "+file_name+" ; if ! [ -f geometry.in.next_step ] ; ";
+  command+="then cp geometry.in geometry.in.next_step ; fi";
+  system(command.c_str());
+  command.clear();
 }
 
 
@@ -78,11 +89,19 @@ else
       if(initialization_file.length() > 5 && count==1)
       {
       //Inicializa archivo geometry.in
-        command ="cp ";
-        command+=initialization_file;
-        command+="geometry.in";
-        system(command.c_str());
-        command.clear();
+        /////////////////////////////////
+        command ="cp ";                //
+        command+=initialization_file;  //
+        command+=" "+file_name+"/geometry.in";
+        system(command.c_str());       //
+        command.clear();               //
+        /////////////////////////////////
+        command ="cp ";                //
+        command+=initialization_file;  //
+        command+=" "+file_name+"/geometry.in.next_step";
+        system(command.c_str());       //
+        command.clear();               //
+        /////////////////////////////////
         count++;
       }
       else
@@ -526,3 +545,4 @@ else
 } // END OF BH-LOOP
 return 0;
 }
+
